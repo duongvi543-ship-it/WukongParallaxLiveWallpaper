@@ -1,11 +1,6 @@
 name: Build Wukong Live Wallpaper
 
-on:
-  workflow_dispatch:
-  push:
-    paths:
-      - 'WukongParallaxLiveWallpaper_V1.zip'
-      - '.github/workflows/build-apk.yml'
+on: [push, workflow_dispatch]
 
 permissions:
   contents: read
@@ -16,46 +11,39 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Extract Android project
-        run: unzip -q WukongParallaxLiveWallpaper_V1.zip
+        shell: bash
+        run: |
+          unzip -q "WukongParallaxLiveWallpaper_V1.zip"
+          test -f "WukongParallaxLiveWallpaper/settings.gradle"
 
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
-          distribution: temurin
-          java-version: '17'
+          distribution: "temurin"
+          java-version: "17"
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
         with:
-          packages: 'platforms;android-36 build-tools;36.0.0'
+          packages: "platforms;android-36 build-tools;36.0.0"
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
         with:
-          gradle-version: '8.13'
+          gradle-version: "8.13"
 
       - name: Build APK
-        working-directory: WukongParallaxLiveWallpaper
-        run: gradle :app:assembleDebug --no-daemon
+        working-directory: "WukongParallaxLiveWallpaper"
+        shell: bash
+        run: |
+          gradle :app:assembleDebug --no-daemon --stacktrace
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Wukong-Parallax-APK
-          path: WukongParallaxLiveWallpaper/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error        with:
-          gradle-version: '8.13'
-
-      - name: Build APK
-        working-directory: WukongParallaxLiveWallpaper
-        run: gradle :app:assembleDebug --no-daemon
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: Wukong-Parallax-APK
-          path: WukongParallaxLiveWallpaper/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+          name: "Wukong-Parallax-APK"
+          path: "WukongParallaxLiveWallpaper/app/build/outputs/apk/debug/app-debug.apk"
+          if-no-files-found: "error"
